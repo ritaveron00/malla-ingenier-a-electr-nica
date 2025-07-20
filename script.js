@@ -150,7 +150,7 @@ function inicializarTablas() {
                     inputNotaFinalManual.style.display = "block";
                     inputNotaFinalManual.value = datos.notaFinal || ""; 
                     spanNotaFinalEstatica.style.display = "none";
-                    celdaEstado.textContent = "";
+                    celdaEstado.textContent = ""; // "Recursar" muestra celda vacía
                     celdaEstado.classList.add("obligatoria");
                 }
                 else if (datos.estado === "Aprobada") { 
@@ -234,10 +234,17 @@ function inicializarTablas() {
                 }
 
                 const sumaNotas = notasNumericas.reduce((sum, current) => sum + current, 0);
+                const notasAprobadas = notasNumericas.filter(n => n >= 4 && n <= 10).length;
+                const notasDesaprobadas = notasNumericas.filter(n => n < 4).length;
                 
+                // Lógica de cálculo de promedio y estados
                 if (notasNumericas.length === 1) {
                     const nota = notasNumericas[0];
-                    if (nota >= 7) {
+                    if (nota < 4) { // Si la primera nota es menor a 4, marca "Recupera"
+                        textoEstadoColumna = "Recupera";
+                        celdaEstado.classList.add("obligatoria");
+                        inputNotaFinalManual.style.display = "block";
+                    } else if (nota >= 7) {
                         textoEstadoColumna = "Promocionada";
                         celdaEstado.classList.add("promocionada");
                         notaNumericaRedondeada = aplicarRedondeoUBAXXI(nota);
@@ -249,17 +256,14 @@ function inicializarTablas() {
                         textoEstadoColumna = "Obligatoria";
                         celdaEstado.classList.add("obligatoria");
                         inputNotaFinalManual.style.display = "block";
-                    } else if (nota < 4 && nota >= 0) {
-                        textoEstadoColumna = "Recursar"; 
-                        celdaEstado.classList.add("obligatoria");
-                        inputNotaFinalManual.style.display = "block";
-                    }
+                    } 
                 } else if (notasNumericas.length === 2) {
+                    // Si ya hay 2 notas, se evalúa la condición de "Recupera" o "Recursar" o "Promociona" o "Obligatoria"
                     const nota1 = notasNumericas[0];
                     const nota2 = notasNumericas[1];
                     const suma = nota1 + nota2;
                     
-                    if (suma >= 14 && nota1 >= 4 && nota2 >= 4) { 
+                    if (suma >= 14 && notasAprobadas === 2) { 
                         textoEstadoColumna = "Promocionada";
                         celdaEstado.classList.add("promocionada");
                         promedioCalculado = suma / 2;
@@ -268,28 +272,23 @@ function inicializarTablas() {
                         spanNotaFinalEstatica.style.display = "block";
                         fechaParaGuardar = new Date().toLocaleDateString("es-AR");
                         celdaNombre.classList.add("celda-materia-aprobada");
-                    } else if ((nota1 >= 4 && nota2 < 4) || (nota2 >= 4 && nota1 < 4)) { 
+                    } else if (notasDesaprobadas === 1) { // Una desaprobada
                         textoEstadoColumna = "Recupera";
                         celdaEstado.classList.add("obligatoria");
                         inputNotaFinalManual.style.display = "block";
-                    } else if (nota1 < 4 && nota2 < 4) { 
+                    } else if (notasDesaprobadas === 2) { // Ambas desaprobadas
                         textoEstadoColumna = "Recursar";
                         celdaEstado.classList.add("obligatoria");
                         inputNotaFinalManual.style.display = "block";
-                    } else { 
+                    } else { // Suma < 14 pero ambas aprobadas
                          textoEstadoColumna = "Obligatoria";
                          celdaEstado.classList.add("obligatoria");
                          inputNotaFinalManual.style.display = "block";
                     }
                 } else if (notasNumericas.length === 3) {
-                    const nota1 = notasNumericas[0];
-                    const nota2 = notasNumericas[1];
-                    const nota3 = notasNumericas[2];
-                    const suma = nota1 + nota2 + nota3;
+                    const suma = notasNumericas.reduce((sum, current) => sum + current, 0);
 
-                    const desaprobadas = notasNumericas.filter(n => n < 4).length;
-
-                    if (suma >= 20 && notasNumericas.every(n => n >= 4)) { 
+                    if (suma >= 20 && notasAprobadas === 3) { 
                         textoEstadoColumna = "Promocionada";
                         celdaEstado.classList.add("promocionada");
                         promedioCalculado = suma / 3;
@@ -298,15 +297,19 @@ function inicializarTablas() {
                         spanNotaFinalEstatica.style.display = "block";
                         fechaParaGuardar = new Date().toLocaleDateString("es-AR");
                         celdaNombre.classList.add("celda-materia-aprobada");
-                    } else if (desaprobadas === 1) { 
+                    } else if (notasAprobadas === 2 && notasDesaprobadas === 1) { // 2 aprobadas, 1 desaprobada
+                        textoEstadoColumna = "Obligatoria";
+                        celdaEstado.classList.add("obligatoria");
+                        inputNotaFinalManual.style.display = "block";
+                    } else if (notasDesaprobadas === 1) { // Una desaprobada (esto cubre el caso de 2 aprobadas y 1 desaprobada, si la suma no da 20)
                         textoEstadoColumna = "Recupera";
                         celdaEstado.classList.add("obligatoria");
                         inputNotaFinalManual.style.display = "block";
-                    } else if (desaprobadas >= 2) { 
+                    } else if (notasDesaprobadas >= 2) { 
                         textoEstadoColumna = "Recursar";
                         celdaEstado.classList.add("obligatoria");
                         inputNotaFinalManual.style.display = "block";
-                    } else { 
+                    } else { // Caso de notas aprobadas pero no llega al promedio de promoción
                         textoEstadoColumna = "Obligatoria";
                         celdaEstado.classList.add("obligatoria");
                         inputNotaFinalManual.style.display = "block";
