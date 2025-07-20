@@ -1,10 +1,10 @@
 const materias = [
   { anio: "Primer Año", nombre: "Pensamiento Científico" },
   { anio: "Primer Año", nombre: "Pensamiento Computacional" },
-  { anio: "Primer Año", nombre: "Análisis Matemático" },
+  { anio: "Primer Año", nombre: "Análisis Matemático A" },
   { anio: "Primer Año", nombre: "Sociedad y Estado" },
   { anio: "Primer Año", nombre: "Física" },
-  { anio: "Primer Año", nombre: "Álgebra" },
+  { anio: "Primer Año", nombre: "Álgebra A" },
   { anio: "Segundo Año", nombre: "Análisis Matemático II" },
   { anio: "Segundo Año", nombre: "Física de los Sistemas de Partículas" },
   { anio: "Segundo Año", nombre: "Introducción a la Ingeniería Electrónica" },
